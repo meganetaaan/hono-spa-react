@@ -28,12 +28,11 @@ function Counter() {
 function subscribe<T extends keyof MessagesMap>(topicName: string, topicType: T, callback: (message: MessagesMap[T]) => unknown) {
   // TODO: 任意のトピックを購読する
   // TODO: エラーハンドリング
-  const source = new EventSource('/api/sse')
+  const source = new EventSource('/api/subscribe')
   source.onerror = (error => {
     debugger
   })
   source.onmessage = (message => {
-    console.log(message)
     const newMsg = JSON.parse(message.data) as MessagesMap[T]
     callback(newMsg)
   })
@@ -59,13 +58,13 @@ async function publish<T extends keyof MessagesMap>(topicName: string, topicType
 const ClockButton = () => {
   const [response, setResponse] = useState<string | null>(null)
   const [text, setText] = useState<string>("")
-  const [messages, setMessages] = useState<string>("")
+  const [messages, setMessages] = useState<string[]>([])
 
   useEffect(() => {
-    let msg = messages
+    let arr: string[] = []
     subscribe("hello", "std_msgs/msg/String", (message) => {
-      msg += message.data
-      setMessages(msg)
+      arr.push(message.data)
+      setMessages([...arr])
     })
   }, []);
 
@@ -93,7 +92,11 @@ const ClockButton = () => {
       {response && <pre>{response}</pre>}
       <input type="text" value={text} onChange={(e) => { setText(e.target.value) }}></input>
       <button onClick={handleSendButtonClick}>send</button>
-      <div>{messages}</div>
+      <ul>
+        {messages.map((message, idx) => 
+          <li key={idx}>{message}</li>
+        )}
+      </ul>
     </div>
   )
 }
