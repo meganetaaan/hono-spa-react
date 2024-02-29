@@ -17,12 +17,19 @@ export default defineConfig(({ mode }) => {
   } else {
     return {
       ssr: {
-        external: ['react', 'react-dom']
+        external: ['react', 'react-dom', 'rclnodejs']
       },
       plugins: [
         pages(),
         devServer({
-          entry: 'src/index.tsx'
+          entry: 'src/index.tsx',
+          plugins: [
+            {
+              onServerClose: () => {
+                console.log('close')
+              }
+            }
+          ]
         })
       ]
     }
